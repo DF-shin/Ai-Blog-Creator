@@ -1,10 +1,15 @@
 import json
+import os
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from pytube import YouTube
+import assemblyai as aai
+import openai
 
 
 @login_required
@@ -18,16 +23,56 @@ def generate_blog(request):
         try:
             data = json.loads(request.body)
             yt_link = data['link']
+
         except (KeyError, json.JSONDecodeError):
             return JsonResponse({'Error': 'Invalid data sent'}, status=400)
 
         # get yt title
+        title = yt_title(yt_link)
+
         # get transcript
+        transcription = get_transcription(yt_link)
+        if not transcription:
+            return JsonResponse({'error': 'Failed to get transcprit'}, status=500)
+
         # use OpenAI to generate the blog
+
         # save blog to article to database
+
         # return blog to article as a response
+
     else:
         return JsonResponse({'Error': 'Invalid request method'}, status=405)
+
+
+def download_audio(link):
+    yt = YouTube(link)
+    video = yt.streams.filter(only_audio=True).first()
+    out_file = video.download(output_path=settings.MEDIA_ROOT)
+    base, ext = os.path.splitext(out_file)
+    new_file = base + '.mp3'
+    os.rename(out_file, new_file)
+    return new_file
+
+
+def yt_title(link):
+    yt = YouTube(link)
+    title = yt.title
+    return title
+
+
+def get_transcription(link):
+    audio_file = download_audio(link)
+    aai.settings.api_key = os.getenv("AAI_API_KEY", default="")
+
+    transcriber = aai.Transcriber()
+    transcript = transcriber.transcribe(audio_file)
+
+    return transcriber.text
+
+
+def generate_blog_from_transcription(transcription):
+    pass
 
 
 def user_login(request):

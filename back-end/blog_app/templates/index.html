@@ -99,7 +99,7 @@
         </div>
 
         <!-- section for loading circle -->
-        <div style="display: none" id="loading-circle" class="load"></div>
+        <div style="" id="loading-circle" class="load hidden"></div>
 
         <!-- Generated Blog Display -->
         <section class="mt-10 flex-grow">
@@ -114,44 +114,45 @@
     </footer>
 
     <script>
-      document.getElementById('generateBlogButton').addEventListener('click', async () => {
+      document
+        .getElementById("generateBlogButton")
+        .addEventListener("click", async () => {
+          const youtubeLink = document.getElementById("youtubeLink").value;
+          const loadingIndicator = document.getElementById("loading");
+          const blogContent = document.getElementById("blogContent");
 
-        const youtubeLink = document.getElementById('youtubeLink').values;
-        const loadingIndicator = document.getElementById('loading');
-        const blogContent = document.getElementById('blogContent');
+          if (youtubeLink) {
+            document
+              .getElementById("loading-circle")
+              .classList.remove("hidden");
+            loadingIndicator.classList.remove("hidden");
+            blogContent.innerHTML = "";
 
-        if(youtubeLink) {
-          document.getElementById('loading-circle').stlye.display = 'block':
-          loadingIndicator.classList.remove('hidden');
-          blogContent.innerHTML = '';
+            const endpointURL = "/generatre-blog";
 
-          const endpointURL - '/generatre-blog';
-
-          try {
+            try {
               const response = await fetch(endpointURL, {
-                method 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ link: youtubeLink })
+                body: JSON.stringify({ link: youtubeLink }),
               });
 
-              const data = await response.json():
+              const data = await response.json();
 
               blogContent.innerHTML = data.content;
-              loadingIndicator.classList.add('hidden');
-
-          } catch (error) {
-              console.error('Error occurred:', error);
-              alert('Something went wrong. Please try again later.')
-              loadingIndicator.classList.add('hidden');
+              loadingIndicator.classList.add("hidden");
+            } catch (error) {
+              console.error("Error occurred:", error);
+              alert("Something went wrong. Please try again later.");
+              loadingIndicator.classList.add("hidden");
+            }
+            document.getElementById("loading-circle").classList.add("hidden");
+          } else {
+            alert("Please enter a Youtube link.");
           }
-          document.getElementById('loading-circle').stlye.display = 'none';
-
-        } else {
-          alert('Please enter a Youtube link.');
-        }
-      });
+        });
     </script>
   </body>
 </html>
