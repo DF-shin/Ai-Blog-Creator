@@ -36,11 +36,13 @@ def generate_blog(request):
             return JsonResponse({'error': 'Failed to get transcprit'}, status=500)
 
         # use OpenAI to generate the blog
-
+        blog_content = generate_blog_from_transcription(transcription)
+        if not blog_content:
+            return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
         # save blog to article to database
 
         # return blog to article as a response
-
+        return JsonResponse({'content': blog_content})
     else:
         return JsonResponse({'Error': 'Invalid request method'}, status=405)
 
@@ -68,19 +70,19 @@ def get_transcription(link):
     transcriber = aai.Transcriber()
     transcript = transcriber.transcribe(audio_file)
 
-    return transcriber.text
+    return transcript.text
 
 
 def generate_blog_from_transcription(transcription):
-    openai.api_key = os.getenv("OPENAI_API_KEY", default="")
+    openai.api_key = os.getenv("OPENAI_API_KEY", default='')
 
     prompt = f"Based on the following transcript from a YouTube video, write a comprehnsive blog article, write it based on the transcript, but don't make it look like youtube video make it look like a proper blod article:\n\n{
         transcription}\n\nArticles:"
 
     response = openai.Completion.create(
-        model='text-devinci-003',
+        model='davinci-002',
         prompt=prompt,
-        max_tokens=1000
+        max_tokens=50
     )
 
     generated_content = response.choices[0].text.strip()
