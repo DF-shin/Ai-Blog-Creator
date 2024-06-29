@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from pytube import YouTube
 import assemblyai as aai
 import openai
+from .models import BlogPost, models
 
 
 @login_required
@@ -35,14 +36,23 @@ def generate_blog(request):
         if not transcription:
             return JsonResponse({'error': 'Failed to get transcprit'}, status=500)
 
+        # REMEMBER TO CHANGE THE NAME OF EVERYTHING TO BLOG ARTICLE AFTER THE OPENAI WORKS
         # use OpenAI to generate the blog
-        blog_content = generate_blog_from_transcription(transcription)
-        if not blog_content:
-            return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
+        # blog_content = generate_blog_from_transcription(transcription)
+        # if not blog_content:
+        #     return JsonResponse({'error': 'Failed to generate blog article'}, status=500)
+
         # save blog to article to database
+        new_blog_article = BlogPost.objects.create(
+            user=request.user,
+            youtube_title=title,
+            youtube_link=yt_link,
+            generated_content=transcription,
+        )
+        new_blog_article.save()
 
         # return blog to article as a response
-        return JsonResponse({'content': blog_content})
+        return JsonResponse({'content': transcription})
     else:
         return JsonResponse({'Error': 'Invalid request method'}, status=405)
 
@@ -73,21 +83,23 @@ def get_transcription(link):
     return transcript.text
 
 
-def generate_blog_from_transcription(transcription):
-    openai.api_key = os.getenv("OPENAI_API_KEY", default='')
+# UNCOMMENT WHEN THE AI KEY IS ACTUALLY WORKING RIGHT
+# FOR NOW JUST USE THE TRANSCRIPT TO MAKE SURE EVERYTHING ELSE IS WORKING FINE
+# def generate_blog_from_transcription(transcription):
+#     openai.api_key = os.getenv("OPENAI_API_KEY", default='')
 
-    prompt = f"Based on the following transcript from a YouTube video, write a comprehnsive blog article, write it based on the transcript, but don't make it look like youtube video make it look like a proper blod article:\n\n{
-        transcription}\n\nArticles:"
+#     prompt = f"Based on the following transcript from a YouTube video, write a comprehnsive blog article, write it based on the transcript, but don't make it look like youtube video make it look like a proper blod article:\n\n{
+#         transcription}\n\nArticles:"
 
-    response = openai.Completion.create(
-        model='davinci-002',
-        prompt=prompt,
-        max_tokens=50
-    )
+#     response = openai.Completion.create(
+#         model='davinci-002',
+#         prompt=prompt,
+#         max_tokens=50
+#     )
 
-    generated_content = response.choices[0].text.strip()
+#     generated_content = response.choices[0].text.strip()
 
-    return generated_content
+#     return generated_content
 
 
 def user_login(request):
