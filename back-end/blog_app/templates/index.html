@@ -104,7 +104,7 @@
         <!-- Generated Blog Display -->
         <section class="mt-10 flex-grow">
           <h2 class="text-xl mb-4 font-semibold">Generated Blog Article</h2>
-          <div id="blockContent" class="mt-2 text-gray-700 space-y-4"></div>
+          <div id="blogContent" class="mt-2 text-gray-700 space-y-4"></div>
         </section>
       </div>
     </div>
@@ -113,6 +113,45 @@
       Powered by <a href="https://github.com/DF-shin">DF-Shin</a>
     </footer>
 
-    <script></script>
+    <script>
+      document.getElementById('generateBlogButton').addEventListener('click', async () => {
+
+        const youtubeLink = document.getElementById('youtubeLink').values;
+        const loadingIndicator = document.getElementById('loading');
+        const blogContent = document.getElementById('blogContent');
+
+        if(youtubeLink) {
+          document.getElementById('loading-circle').stlye.display = 'block':
+          loadingIndicator.classList.remove('hidden');
+          blogContent.innerHTML = '';
+
+          const endpointURL - '/generatre-blog';
+
+          try {
+              const response = await fetch(endpointURL, {
+                method 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ link: youtubeLink })
+              });
+
+              const data = await response.json():
+
+              blogContent.innerHTML = data.content;
+              loadingIndicator.classList.add('hidden');
+
+          } catch (error) {
+              console.error('Error occurred:', error);
+              alert('Something went wrong. Please try again later.')
+              loadingIndicator.classList.add('hidden');
+          }
+          document.getElementById('loading-circle').stlye.display = 'none';
+
+        } else {
+          alert('Please enter a Youtube link.');
+        }
+      });
+    </script>
   </body>
 </html>
