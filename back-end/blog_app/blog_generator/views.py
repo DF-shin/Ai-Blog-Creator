@@ -107,6 +107,14 @@ def blog_list(request):
     return render(request, 'all-blogs.html', {'blog_articles': blog_articles})
 
 
+def blog_show(request, pk):
+    blog_article_show = BlogPost.objects.get(id=pk)
+    if request.user == blog_article_show.user:
+        return render(request, 'blog-show.html', {'blog_article_show': blog_article_show})
+    else:
+        return redirect('/')
+
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
